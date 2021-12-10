@@ -31,7 +31,7 @@ import GoodsListItem from './GoodsListItem.vue'
     flex-wrap: wrap;
     /* 间隔为两边的两倍 */
     justify-content: space-around;
-
     padding: 5px;
+    background-color: rgb(240, 240, 240);
   }
 </style>

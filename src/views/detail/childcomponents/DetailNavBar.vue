@@ -26,7 +26,7 @@
     name: 'DetailNavbar',
     data(){
       return {
-        titles: ['商品','参数','评论','推荐'],
+        titles: ['宝贝','评论','详细','推荐'],
         currentIndex: 0
       }
     },
@@ -47,6 +47,11 @@
 </script>
 
 <style scoped>
+  #detailNavBar {
+    background-color: white;
+    position: relative;
+    z-index: 11;
+  }
   .title {
     display: flex;
     font-size: 0.9em;

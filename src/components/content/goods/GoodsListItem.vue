@@ -1,6 +1,6 @@
 <template>
   <div class="goods-item" @click="goodsItemClick">
-    <img :src="goodsItem.show.img" @load="imageLoad" alt=""/>
+    <img :src="showImage" @load="imageLoad" alt=""/>
     <div class="goods-info">
       <p>{{goodsItem.title}}</p>
       <span class="price">{{goodsItem.price}}</span>
@@ -25,12 +25,24 @@
         id: '3160'
       }
     },
+    computed: {
+      showImage() {
+        // 复用时传入的位置有差异，所以做一个判断
+        // this.goodsItem.image找到goodsItem但找不到image，所以是undefined
+        // this.goodsItem.show.img写在前面报错的原因是没有找到show就去找img，所以不是undefined而是报错
+        return this.goodsItem.image || this.goodsItem.show.img
+      }
+    },
     methods: {
       imageLoad() {
         // 向事件总线发送事件，图片加载完毕重新计算滚动高度
         this.$bus.$emit('itemImageLoad')
       },
       goodsItemClick() {
+        if (this.goodsItem.iid == undefined) {
+          console.log(this.goodsItem);
+          return
+        }
         this.$router.push('/detail/' + this.goodsItem.iid)
       }
     }
@@ -40,9 +52,12 @@
 
 <style scoped>
   .goods-item {
-    padding-bottom: 45px;
+    padding-bottom: 40px;
     position: relative;
     width: 48%;
+    background-color: white;
+    margin-bottom: 10px;
+    border-radius: 7px;
   }
 
   .goods-item img {
@@ -53,18 +68,19 @@
   .goods-info {
     font-size: 12px;
     position: absolute;
-    bottom: 10px;
+    bottom: 5px;
     left: 0;
     right: 0;
     overflow: hidden;
     text-align: center;
+    padding: 0 5px 0;
   }
 
   .goods-info p {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    margin-bottom: 3px;
+    margin-bottom: 5px;
   }
 
   .goods-info .price {

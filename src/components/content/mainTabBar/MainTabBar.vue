@@ -1,6 +1,6 @@
 <template>
   <div class="main-tab-bar">
-    <tab-bar>
+    <tab-bar class="tab-bar">
 
       <tab-bar-item path="/home" activeColor="rgb(205, 70, 110)">
         <template v-slot:item-icon>
@@ -68,5 +68,10 @@
   .main-tab-bar {
     /* 防止上下话都不敢时被tabControl覆盖 */
     z-index: 9;
+    background-color: white;
+  }
+  .tab-bar {
+    max-width: 600px;
+    margin: auto;
   }
 </style>

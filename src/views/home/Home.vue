@@ -2,10 +2,11 @@
   <div id="home">
     <nav-bar class="home-nav"><template v-slot:center>购物街</template></nav-bar>
     <tab-control :title="['流行','新款','精选']" ref="tabControl1"
-                  class="tab-control" v-show="isTabControlFixed"
-                  @tabClick="tabClick"/>
+      class="tab-control" v-show="isTabControlFixed"
+      @tabClick="tabClick"
+    />
     <scroll class="content" ref="scroll" :probe-type="3"
-           :pull-up-load="true" @scroll="contentScroll" @pullingUp="loadMore"
+      :pull-up-load="true" @scroll="contentScroll" @pullingUp="loadMore"
     >
       <home-swiper :banners="banners" @swiperImageLoad.once="ImageLoad"/>
       <recommend-view :recommends="recommends" @recommendImageLoad.once="ImageLoad"/>
@@ -30,6 +31,7 @@
 
   import {getHomeMultidata, getHomeGoods} from '@/network/home.js'
   import {debounce} from '@/common/utils.js'
+  import {itemListenerMixin} from '@/common/mixin.js'
 
   export default {
     name: 'Home',
@@ -50,9 +52,10 @@
           'pop': 0,
           'new': 0,
           'sell': 0
-        }
+        },
       }
     },
+    mixins: [itemListenerMixin],
     components: {
       HomeSwiper,
       RecommendView,
@@ -72,12 +75,6 @@
       this.getHomeGoods('sell')
     },
     mounted() {
-      // debounce是防抖动的方法
-      const refresh = debounce(this.$refs.scroll.refresh, 500)
-      // 图片加载完成的事件监听
-      this.$bus.$on('itemImageLoad', () => {
-        refresh()
-      })
     },
     computed: {
       showGoods() {
@@ -86,34 +83,35 @@
       }
     },
     activated() {
-      this.$refs.scroll.refresh() // 不明具体作用，但是删掉会出现自动回到pisition:0位置的bug
+      this.$refs.scroll.refresh() // 解决自动回到pisition:0位置的bug
       this.$refs.scroll.scrollTo(0, this.scrollY[this.currentType], 0)
+      // 图片加载完成的事件监听
+      this.$bus.$on('itemImageLoad', this.itemImgLoadListener)
     },
     deactivated() {
       // 保存离开时的滚动位置
       this.saveScrollPosition(this.currentType)
       // 停止滚动,stop赢在save之后
       this.$refs.scroll.scrollStop()
+      // 离开时取消对goodsItem组件事件的监听，itemImgLoadListener在mixin中
+      this.$bus.$off('itemImageLoad', this.itemImgLoadListener)
     },
     methods: {
       /**
        * 事件监听相关的方法
        */
       tabClick(index) {
-        // 保存当前tabControl的滚动位置
+        // 保存当前tabControl选项卡的滚动位置
         if(this.isTabControlFixed) {
           this.saveScrollPosition(this.currentType)
-          // console.log(this.scrollY[this.currentType]);
         }
 
-        // 修改当前正在显示的选项，同时让 Home 传递需要goods到goods-list
-        // Object.keys会获取对象的key数组
+        // 修改当前正在显示的选项，同时让 Home 传递需要 goods 到 goods-list
         this.currentType = Object.keys(this.goods)[index]
         // 同步两个tabContrl的选项
         this.$refs.tabControl1.currentIndex = index
         this.$refs.tabControl2.currentIndex = index
 
-        this.$refs.scroll.refresh()
         if(this.isTabControlFixed) {
           this.$refs.scroll.scrollTo(0, this.scrollY[this.currentType], 0)
           this.$refs.scroll.scrollStop()  // 这句话是为了解决无法滚动到正确位置的bug
@@ -129,8 +127,8 @@
         // 1.判断BackTop是否显示，下拉当 y 小于 -1000 时显示
         this.isShowBackTop = (-position.y) > 1000
 
-        // 2.决定tabControl是否吸顶(position:fixed)
-        this.isTabControlFixed = (-position.y) > this.tabOffsetTop
+        // 2.判断tabControl是否吸顶
+        this.isTabControlFixed = ((-position.y) >= this.tabOffsetTop)
       },
       loadMore() {
         this.getHomeGoods(this.currentType)
@@ -144,14 +142,14 @@
         // 所有组件都有一个属性$el，用于获取组件中的元素
         this.tabOffsetTop = this.$refs.tabControl2.$el.offsetTop
 
-        // 初始化tabControl高度
+        // 初始化tabControl高度，用于记住tabcontrol其他选项卡的初始位置
         for(let yType in this.scrollY) {
-          this.scrollY[yType] = - this.tabOffsetTop - 41  // 40为tabControl的高度
+          this.scrollY[yType] = - this.tabOffsetTop
         }
       },
-      saveScrollPosition(type) {
+      saveScrollPosition(type, offset) {
         // 保存滚动位置
-        this.scrollY[type] = this.$refs.scroll.scroll.y
+        this.scrollY[type] = offset ? this.$refs.scroll.scroll.y + offset : this.$refs.scroll.scroll.y
       },
 
       /**
