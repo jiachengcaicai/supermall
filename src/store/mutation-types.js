@@ -1,0 +1,5 @@
+export const ADD_CART_COUNT = 'add_CART_count'
+export const ADD_TO_CART = 'add_to_cart'
+export const CLICK_GOODS_SELECTION_BOX = 'click_goods_selection_box'
+export const SELECT_ALL_ITEM = 'select_all_item'
+export const REMOVE_SELECT_ALL_ITEM = 'remove_select_all_item'

@@ -63,3 +63,19 @@ a {
 .right {
   float: right;
 }
+/* 以下是为了修改element弹出框的样式 */
+.el-message {
+  background-color:rgba(240, 240, 240, 0.6) !important;
+  width: auto;
+  height: 30px;
+  min-width: 50px;
+  padding: 5px 10px;
+  top: 70% !important;
+}
+.el-message__icon {
+  font-size: 0;
+  margin: 0;
+}
+.el-message--info .el-message__content {
+  color: var(--color-high-text);
+}

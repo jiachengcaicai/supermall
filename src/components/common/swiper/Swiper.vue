@@ -118,11 +118,10 @@
       /**
        * 操作DOM, 在DOM前后添加Slide
        */
-		  handleDom: function () {
+		  async handleDom() {
         // 1.获取要操作的元素
-        let swiperEl = document.querySelector('.swiper');
-        let slidesEls = swiperEl.getElementsByClassName('slide');
-
+        let swiperEl = await document.querySelector('.swiper');
+        let slidesEls = await swiperEl.getElementsByClassName('slide');
 
         // 2.保存个数
         this.slideCount = slidesEls.length;

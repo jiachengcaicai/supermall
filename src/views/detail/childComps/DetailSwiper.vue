@@ -7,7 +7,7 @@
 </template>
 
 <script>
-  import {Swiper, SwiperItem} from '@/components/common/swiper/index.js'
+  import {Swiper, SwiperItem} from 'components/common/swiper/index.js'
 
   export default {
     name: 'DetailSwiper',

@@ -42,7 +42,7 @@
         // 所有图片都加载完后发送事件，刷新滚动高度
         this.loadCount++
         if(this.loadCount === this.imagesLength) {
-          this.$emit('goodsInfoImageLoad')
+          this.$emit('goodsImgLoadOk')
         }
       }
     },

@@ -1,7 +1,6 @@
 <template>
   <div class="main-tab-bar">
     <tab-bar class="tab-bar">
-
       <tab-bar-item path="/home" activeColor="rgb(205, 70, 110)">
         <template v-slot:item-icon>
           <img src="@/assets/img/tabbar/home.png" alt="">
@@ -41,7 +40,6 @@
         </template>
         <template v-slot:item-text>我的</template>
       </tab-bar-item>
-
     </tab-bar>
   </div>
 </template>
@@ -70,8 +68,8 @@
     z-index: 9;
     background-color: white;
   }
-  .tab-bar {
+  /* .tab-bar {
     max-width: 600px;
     margin: auto;
-  }
+  } */
 </style>

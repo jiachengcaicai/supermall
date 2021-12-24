@@ -1,7 +1,7 @@
 <template>
   <div class="wrapper" ref="wrapper">
     <ul class="content">
-      <a @click="btnClick">按钮</a>
+      <h3>分类</h3>
       <li>列表1</li>
       <li>列表2</li>
       <li>列表3</li>
@@ -104,6 +104,7 @@
       <li>列表100</li>
     </ul>
   </div>
+  <!-- <div class="zhuzhuzhuzhu" :plain="true" @click="openCenter">文字</div> -->
 </template>
 
 <script>
@@ -117,9 +118,9 @@
     },
     // created在模板组件渲染成html前调用，即通常初始化某些属性值，然后再渲染成视图
     // mounted在模板组件渲染成html后调用，通常是初始化页面完成后，再对html的dom节点进行一些需要的操作
-    // created() {
-    //   console.log(this.$refs.wrapper);  //undefined
-    // },
+    created() {
+      // console.log(this.$refs.wrapper);  //undefined
+    },
     mounted() {
       this.scroll = new BScroll(document.querySelector('.wrapper'), {
         probeType: 3,
@@ -137,10 +138,13 @@
         this.scroll.finishPullUp()
       })
     },
+    activated() {
+      this.scroll.refresh()
+    },
     methods: {
       btnClick() {
         console.log("点击了按钮");
-      }
+      },
     },
   }
 
@@ -148,23 +152,11 @@
 
 <style scoped>
   .wrapper {
-    height: 150px;
-    background-color: red;
+    height: 80vh;
+    margin: 5px;
+    border-radius: 10px;
+    padding: 10px 10px 10px;
+    background-color: rgb(240, 240, 240);
     overflow: hidden;
-  }
-  .el-carousel__item h3 {
-    color: #475669;
-    font-size: 18px;
-    opacity: 0.75;
-    line-height: 300px;
-    margin: 0;
-  }
-
-  .el-carousel__item:nth-child(2n) {
-    background-color: #99a9bf;
-  }
-
-  .el-carousel__item:nth-child(2n+1) {
-    background-color: #d3dce6;
   }
 </style>

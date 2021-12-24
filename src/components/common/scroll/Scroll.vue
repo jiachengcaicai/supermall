@@ -56,16 +56,18 @@
     },
     methods: {
       scrollTo(x, y, time = 300) {
-        // time = 300的写法是如果没有传入参数，默认为300
         this.scroll && this.scroll.scrollTo(x, y, time)
       },
       refresh() {
         // 调用 bs.refresh() 来确保得到正确的图片高度之后再计算可滚动的高度
         this.scroll && this.scroll.refresh()
+        // console.log('scroll refresh');
       },
       finishPullUp() {
-        // scrollTo(x, y, time, easing, extraTransform)是better-scroll的一个方法
         this.scroll && this.scroll.finishPullUp()
+      },
+      scrollToElement(el, time = 300) {
+         this.scroll && this.scroll.scrollToElement(el, time)
       },
       scrollStop() {
         // 立即停止当前运行的滚动动画，防止滚动中切换到其他视图position还在不断更改的问题

@@ -1,5 +1,5 @@
 <template>
-    <div id="tab-bar">
+    <div class="tab-bar">
       <slot></slot>
     </div>
 </template>
@@ -11,7 +11,7 @@
 </script>
 
 <style scoped>
-  #tab-bar {
+  .tab-bar {
     display: flex;
     justify-content: space-around;
     background-color: #f6f6f6;
@@ -25,8 +25,8 @@
     position: fixed;
     left: 0;
     right: 0;
-    bottom: 0px;
+    bottom: 0;
     z-index: 9;
-    box-shadow: 0 -3px 10px rgba(100, 100, 100, 0.3);
+    box-shadow: 0 -1px 5px rgba(100, 100, 100, 0.2);
   }
 </style>

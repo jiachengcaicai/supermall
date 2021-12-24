@@ -2,19 +2,19 @@
   <div id="home">
     <nav-bar class="home-nav"><template v-slot:center>购物街</template></nav-bar>
     <tab-control :title="['流行','新款','精选']" ref="tabControl1"
-      class="tab-control" v-show="isTabControlFixed"
+      class="tab-control" v-show="tabControlToTop"
       @tabClick="tabClick"
     />
-    <scroll class="content" ref="scroll" :probe-type="3"
+    <scroll class="content ignore" ref="scroll" :probe-type="3"
       :pull-up-load="true" @scroll="contentScroll" @pullingUp="loadMore"
     >
-      <home-swiper :banners="banners" @swiperImageLoad.once="ImageLoad"/>
-      <recommend-view :recommends="recommends" @recommendImageLoad.once="ImageLoad"/>
+      <home-swiper :banners="banners" @swiperImageLoad.once="LoadImgOk"/>
+      <recommend-view :recommends="recommends" @recommendImageLoad.once="LoadImgOk"/>
       <featura-view/>
       <tab-control :title="['流行','新款','精选']" ref="tabControl2" @tabClick="tabClick"/>
       <goods-list :goods="showGoods" />
     </scroll>
-    <back-top @click.native="backClick" v-show="isShowBackTop"></back-top>
+    <back-top @click.native="backToTop" v-show="isShowBackTop" />
   </div>
 </template>
 
@@ -23,15 +23,14 @@
   import RecommendView from './childComps/RecommendView.vue'
   import FeaturaView from './childComps/FeaturaView.vue'
 
-  import NavBar from '@/components/common/navbar/NavBar.vue'
-  import TabControl from '@/components/content/tabControl/TabControl.vue'
-  import GoodsList from '@/components/content/goods/GoodsList.vue'
-  import Scroll from '@/components/common/scroll/Scroll.vue'
-  import BackTop from '@/components/content/backTop/BackTop.vue'
+  import NavBar from 'components/common/navbar/NavBar.vue'
+  import TabControl from 'components/content/tabControl/TabControl.vue'
+  import GoodsList from 'components/content/goods/GoodsList.vue'
+  import Scroll from 'components/common/scroll/Scroll.vue'
 
-  import {getHomeMultidata, getHomeGoods} from '@/network/home.js'
-  import {debounce} from '@/common/utils.js'
-  import {itemListenerMixin} from '@/common/mixin.js'
+  import {getHomeMultidata, getHomeGoods} from 'network/home.js'
+  import {debounce} from 'common/utils.js'
+  import {itemListenerMixin, backTopMixin} from 'common/mixin.js'
 
   export default {
     name: 'Home',
@@ -44,10 +43,9 @@
           'new': {page: 0, list: []},
           'sell': {page: 0, list: []}
         },
-        currentType: 'pop', // 当前正在显示的tabControl的选项
-        isShowBackTop: false, // 是否显示回到顶部
+        currentTabType: 'pop', // 当前正在显示的tabControl的选项
         tabOffsetTop: 0,  // tabControl到Home顶部的距离
-        isTabControlFixed: false,  // 控制tabControl吸顶效果
+        tabControlToTop: false,  // 控制tabControl吸顶效果
         scrollY : {
           'pop': 0,
           'new': 0,
@@ -55,7 +53,7 @@
         },
       }
     },
-    mixins: [itemListenerMixin],
+    mixins: [itemListenerMixin, backTopMixin],
     components: {
       HomeSwiper,
       RecommendView,
@@ -64,7 +62,6 @@
       TabControl,
       GoodsList,
       Scroll,
-      BackTop
     },
     created() {
       // 1.请求多个数据
@@ -78,19 +75,20 @@
     },
     computed: {
       showGoods() {
-        // 通过currentType获取当前选中的是那个tabControl，传递对应选项卡的数据 list
-        return this.goods[this.currentType].list
+        // 通过currentTabType获取当前选中的是那个tabControl，传递对应选项卡的数据 list
+        return this.goods[this.currentTabType].list
       }
     },
     activated() {
-      this.$refs.scroll.refresh() // 解决自动回到pisition:0位置的bug
-      this.$refs.scroll.scrollTo(0, this.scrollY[this.currentType], 0)
       // 图片加载完成的事件监听
       this.$bus.$on('itemImageLoad', this.itemImgLoadListener)
+      // 解决切换view后自动回到pisition:0位置的bug
+      this.$refs.scroll.refresh()
+      this.$refs.scroll.scrollTo(0, this.scrollY[this.currentTabType], 0)
     },
     deactivated() {
       // 保存离开时的滚动位置
-      this.saveScrollPosition(this.currentType)
+      this.saveScrollPosition(this.currentTabType)
       // 停止滚动,stop赢在save之后
       this.$refs.scroll.scrollStop()
       // 离开时取消对goodsItem组件事件的监听，itemImgLoadListener在mixin中
@@ -102,41 +100,36 @@
        */
       tabClick(index) {
         // 保存当前tabControl选项卡的滚动位置
-        if(this.isTabControlFixed) {
-          this.saveScrollPosition(this.currentType)
+        if(this.tabControlToTop) {
+          this.saveScrollPosition(this.currentTabType)
         }
 
         // 修改当前正在显示的选项，同时让 Home 传递需要 goods 到 goods-list
-        this.currentType = Object.keys(this.goods)[index]
+        this.currentTabType = Object.keys(this.goods)[index]
         // 同步两个tabContrl的选项
         this.$refs.tabControl1.currentIndex = index
         this.$refs.tabControl2.currentIndex = index
 
-        if(this.isTabControlFixed) {
-          this.$refs.scroll.scrollTo(0, this.scrollY[this.currentType], 0)
+        if(this.tabControlToTop) {
+          this.$refs.scroll.scrollTo(0, this.scrollY[this.currentTabType], 0)
           this.$refs.scroll.scrollStop()  // 这句话是为了解决无法滚动到正确位置的bug
         }
 
-      },
-      backClick() {
-        // 在一个组件的根元素上直接监听一个原生事件，需要使用v-on 的 .native 修饰符。vue3取消.native修饰符了
-        // 这里this.$refs.scroll是获取到对应的组件，调用组件内的scrollTo方法
-        this.$refs.scroll.scrollTo(0, 0, 500)
       },
       contentScroll(position) {
         // 1.判断BackTop是否显示，下拉当 y 小于 -1000 时显示
         this.isShowBackTop = (-position.y) > 1000
 
         // 2.判断tabControl是否吸顶
-        this.isTabControlFixed = ((-position.y) >= this.tabOffsetTop)
+        this.tabControlToTop = ((-position.y) >= this.tabOffsetTop)
       },
       loadMore() {
-        this.getHomeGoods(this.currentType)
+        this.getHomeGoods(this.currentTabType)
         // 结束上拉加载行为，且2秒后才能继续上拉和重新发送网络请求
         const finishPullUp = debounce(this.$refs.scroll.finishPullUp, 2000)
         finishPullUp()
       },
-      ImageLoad() {
+      LoadImgOk() {
         this.$refs.scroll.refresh()
         // 获取tabControl距离Home顶部的距离offsetTop
         // 所有组件都有一个属性$el，用于获取组件中的元素
@@ -206,10 +199,15 @@
   .content {
     overflow: hidden;
     position: absolute;
-    top: 44px;
-    bottom: 49px;
+    /* top: 44px;
+    bottom: 49px; */
     left: 0;
     right: 0;
+  }
+  /* 该类是为了px转化vm时避免被转化 */
+  .ignore {
+    top: 44px;
+    bottom: 49px;
   }
 
   /* .content { */

@@ -25,6 +25,7 @@
     line-height: 44px;
     text-align: center;
     box-shadow: 0 1px 3px rgb(100, 100, 100, 0.2);
+    font-size: 14px;
   }
   .left, .right {
     width: 60px;

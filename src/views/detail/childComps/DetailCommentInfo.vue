@@ -37,7 +37,7 @@
 </template>
 
 <script>
-  import {formatDate} from '@/common/utils.js'
+  import {formatDate} from 'common/utils.js'
 
   export default {
     name: 'DetailCommentInfo',

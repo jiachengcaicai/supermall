@@ -1,6 +1,6 @@
 <template>
   <div class="goods-item" @click="goodsItemClick">
-    <img :src="showImage" @load="imageLoad" alt=""/>
+    <img v-lazy="showImage" @load="imageLoad" alt="" :key="showImage"/>
     <div class="goods-info">
       <p>{{goodsItem.title}}</p>
       <span class="price">{{goodsItem.price}}</span>
@@ -18,11 +18,6 @@
         default() {
           return {}
         }
-      }
-    },
-    data() {
-      return {
-        id: '3160'
       }
     },
     computed: {
@@ -62,7 +57,8 @@
 
   .goods-item img {
     width: 100%;
-    border-radius: 5px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
   }
 
   .goods-info {
